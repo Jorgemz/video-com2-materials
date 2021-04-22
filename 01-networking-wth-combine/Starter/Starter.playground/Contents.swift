@@ -39,9 +39,8 @@ example(of: "decode") {
   
   URLSession.shared
     .dataTaskPublisher(for: url)
-    .tryMap { data, _ in
-      try JSONDecoder().decode(Todo.self, from: data)
-    }
+    .map(\.data)
+    .decode(type: Todo.self, decoder: JSONDecoder())
     .sink(
       receiveCompletion: { completion in
         if case .failure(let err) = completion { print("Retrieving data failed with \(err)")}
