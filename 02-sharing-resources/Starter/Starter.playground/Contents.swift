@@ -36,6 +36,31 @@ example(of: "shared") {
   //.store(in: &subscriptions)
 }
 
+example(of: "multicast") {
+  let subject = PassthroughSubject<Data, URLError>()
+  
+  let multicasted =
+    URLSession.shared
+    .dataTaskPublisher(for: rwUrl)
+    .map(\.data)
+    .print("shared")
+    .multicast(subject: subject)
+  
+  multicasted
+    .sink(
+      receiveCompletion: { _ in },
+      receiveValue: { print("subscriptions1 received '\($0)'")})
+  
+  multicasted
+    .sink(
+      receiveCompletion: { _ in },
+      receiveValue: { print("subscriptions2 received '\($0)'")})
+  
+  multicasted.connect()
+  
+  subject.send(Data())
+}
+
 /// Copyright (c) 2021 Razeware LLC
 ///
 /// Permission is hereby granted, free of charge, to any person obtaining a copy
