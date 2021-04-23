@@ -8,7 +8,7 @@ var subscriptions = Set<AnyCancellable>()
 
 let photoService = PhotoService()
 
-example(of: "Catching and retriying") {
+example(of: "Catching and retrying") {
   
   photoService
     .fetchPhoto(quality: .high)
@@ -19,7 +19,10 @@ example(of: "Catching and retriying") {
         print("Got error: \(error)")
       })
     .retry(3)
-    .replaceError(with: UIImage(named: "na.jpg")!)
+    .catch { error -> PhotoService.Publisher in
+      print("Failed fetching high quality, falling back to low quality")
+      return photoService.fetchPhoto(quality: .low)
+    }
     .sink(
       receiveCompletion: { print("\($0)") },
       receiveValue: { image in
