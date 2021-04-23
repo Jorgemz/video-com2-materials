@@ -8,7 +8,33 @@ let rwUrl = URL(string: "https://www.raywenderlich.com")!
 
 var subscriptions = Set<AnyCancellable>()
 
-<#Add your code here#>
+example(of: "shared") {
+  let shared =
+    URLSession.shared
+    .dataTaskPublisher(for: rwUrl)
+    .map(\.data)
+    .print("shared")
+    .share()
+  
+  print("subscrinbing first")
+  
+  shared
+    .sink(
+      receiveCompletion: { _ in },
+      receiveValue: { print("subscription1 received: '\($0)'")})
+    .store(in: &subscriptions)
+  
+  print("subscription second")
+  
+  var subscriptions2 =
+    shared
+    .sink(
+      receiveCompletion: { _ in },
+      receiveValue: { print("subscription2 received: '\($0)'")})
+    .store(in: &subscriptions)
+  
+  
+}
 
 /// Copyright (c) 2021 Razeware LLC
 ///
