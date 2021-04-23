@@ -11,7 +11,7 @@ let photoService = PhotoService()
 example(of: "Catching and retriying") {
   
   photoService
-    .fetchPhoto(quality: .high, failingTimes: 2)
+    .fetchPhoto(quality: .high)
     .handleEvents(
       receiveSubscription: { _ in print("Trying...") },
       receiveCompletion: {
@@ -19,6 +19,7 @@ example(of: "Catching and retriying") {
         print("Got error: \(error)")
       })
     .retry(3)
+    .replaceError(with: UIImage(named: "na.jpg")!)
     .sink(
       receiveCompletion: { print("\($0)") },
       receiveValue: { image in
