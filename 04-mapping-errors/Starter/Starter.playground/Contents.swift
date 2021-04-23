@@ -6,7 +6,29 @@ PlaygroundPage.current.needsIndefiniteExecution = true
 
 var subscriptions = Set<AnyCancellable>()
 
-<#Add your code here#>
+example(of: "map vs tryMap") {
+  enum NameError: Error {
+    case tooShort(String)
+    case unknown
+  }
+  
+  Just("Hello")
+    .setFailureType(to: NameError.self)
+    .map{ $0 + " World"}
+    .sink(
+      receiveCompletion: { completion in
+        switch completion {
+        case .finished:
+          print("Done!")
+        case .failure(.tooShort(let name)):
+          print("\(name) is too short")
+        case .failure(.unknown):
+          print("An unknown name error occured")
+        }
+      },
+      receiveValue: { print("Got value \($0)") })
+    .store(in: &subscriptions)
+}
 
 /// Copyright (c) 2021 Razeware LLC
 ///
