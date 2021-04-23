@@ -3,8 +3,65 @@ import Combine
 
 class CombineOperatorsTests: XCTestCase {
 
+  var subscriptions = Set<AnyCancellable>()
   
-  <#Add your code here#>
+  override func tearDown() {
+    subscriptions = []
+  }
+  
+  func test_collect() {
+    //given
+    let values = [0, 1, 2]
+    let publisher = values.publisher
+    
+    //when
+    publisher
+      .collect()
+      .sink(receiveValue: {
+        //then
+        XCTAssert(
+          $0 == values,
+          "Result was expected to be \(values) but was \($0)"
+          )
+      })
+      .store(in: &subscriptions)
+  }
+  
+  func test_flatMapWithMax2Publisher() {
+    //given
+    typealias IntPublisher = PassthroughSubject<Int, Never>
+    
+    let intSubject1 = IntPublisher()
+    let intSubject2 = IntPublisher()
+    let intSubject3 = IntPublisher()
+    
+    let publisher = CurrentValueSubject<IntPublisher, Never>(intSubject1)
+    
+    let expected = [1, 2, 4]
+    var results = [Int]()
+    
+    publisher
+      .flatMap(maxPublishers: .max(2)) { $0 }
+      .sink(receiveValue: {
+        results.append($0)
+      })
+      .store(in: &subscriptions)
+    
+    //when
+    intSubject1.send(1)
+    publisher.send(intSubject2)
+    intSubject2.send(2)
+    publisher.send(intSubject3)
+    intSubject3.send(3)
+    intSubject2.send(4)
+    publisher.send(completion: .finished)
+    
+    //then
+    XCTAssert(
+      results == expected,
+      "Results expected to be \(expected) but were \(results)"
+    )
+  }
   
 }
 
