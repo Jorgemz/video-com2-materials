@@ -6,7 +6,27 @@ PlaygroundPage.current.needsIndefiniteExecution = true
 
 var subscriptions = Set<AnyCancellable>()
 
-<#Add your code here#>
+let photoService = PhotoService()
+
+example(of: "Catching and retriying") {
+  
+  photoService
+    .fetchPhoto(quality: .high, failingTimes: 2)
+    .handleEvents(
+      receiveSubscription: { _ in print("Trying...") },
+      receiveCompletion: {
+        guard case .failure(let error) = $0 else { return }
+        print("Got error: \(error)")
+      })
+    .retry(3)
+    .sink(
+      receiveCompletion: { print("\($0)") },
+      receiveValue: { image in
+        image
+        print("Got image: \(image)")
+      })
+    .store(in: &subscriptions)
+}
 
 /// Copyright (c) 2021 Razeware LLC
 ///
