@@ -14,7 +14,8 @@ example(of: "map vs tryMap") {
   
   Just("Hello")
     .setFailureType(to: NameError.self)
-    .map{ $0 + " World"}
+    .tryMap{ throw NameError.tooShort($0) }
+    .mapError{ $0 as? NameError ?? .unknown }
     .sink(
       receiveCompletion: { completion in
         switch completion {
