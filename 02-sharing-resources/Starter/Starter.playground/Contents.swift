@@ -23,17 +23,17 @@ example(of: "shared") {
       receiveCompletion: { _ in },
       receiveValue: { print("subscription1 received: '\($0)'")})
     .store(in: &subscriptions)
+    
+  var subscriptions2: AnyCancellable? = nil
   
-  print("subscription second")
-  
-  var subscriptions2 =
-    shared
-    .sink(
-      receiveCompletion: { _ in },
-      receiveValue: { print("subscription2 received: '\($0)'")})
-    .store(in: &subscriptions)
-  
-  
+  DispatchQueue.main.asyncAfter(deadline: .now()) {
+    print("subscribing second")
+    subscriptions2 = shared
+      .sink(
+        receiveCompletion: { _ in },
+        receiveValue: { print("subscription2 received: '\($0)'")})
+  }
+  //.store(in: &subscriptions)
 }
 
 /// Copyright (c) 2021 Razeware LLC
